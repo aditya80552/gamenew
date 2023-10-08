@@ -1,153 +1,81 @@
 import pygame
 
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-RED = (255,0,0)
-GREEN = (0,255,0)
-BLUE = (0,0,255)
+# Define the game constants
+SCREEN_WIDTH = 500
+SCREEN_HEIGHT = 300
+PADDLE_WIDTH = 10
+PADDLE_HEIGHT = 50
+BALL_RADIUS = 5
 
+# Initialize Pygame
 pygame.init()
 
-#Initializing the display window
+# Create the game window
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-size = (800,600)
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption("pong")
+# Create the paddle objects
+paddle1 = pygame.Rect(10, 100, PADDLE_WIDTH, PADDLE_HEIGHT)
+paddle2 = pygame.Rect(480, 100, PADDLE_WIDTH, PADDLE_HEIGHT)
 
-#Starting coordinates of the paddle
+# Create the ball object
+ball = pygame.Rect(250, 150, BALL_RADIUS * 2, BALL_RADIUS * 2)
 
-rect_x = 400
-rect_y = 580
+# Set the ball's velocity
+ball.dx = 5
+ball.dy = -5
 
-#initial speed of the paddle
+# Game loop
+while True:
 
-rect_change_x = 0
-rect_change_y = 0
-
-#initial position of the ball
-
-ball_x = 50
-ball_y = 50
-
-#speed of the ball
-
-ball_change_x = 5
-ball_change_y = 5
-
-score = 0
-
-#draws the paddle. Also restricts its movement between the edges
-#of the window.
-def drawrect(screen,x,y):
-
-    if x <= 0:
-
-        x = 0
-
-    if x >= 699:
-
-        x = 699    
-
-    pygame.draw.rect(screen,RED,[x,y,100,20])
-
-#game's main loop    
-
-done = False
-clock=pygame.time.Clock()
-
-while not done:
-
+    # Check for events
     for event in pygame.event.get():
-
         if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
 
-            done = True
+    # Move the paddles
+    paddle1.y += pygame.key.get_pressed()[pygame.K_w] - pygame.key.get_pressed()[pygame.K_s]
+    paddle2.y += pygame.key.get_pressed()[pygame.K_UP] - pygame.key.get_pressed()[pygame.K_DOWN]
 
-        elif event.type == pygame.KEYDOWN:
+    # Keep the paddles within the bounds of the screen
+    paddle1.y = min(paddle1.y, SCREEN_HEIGHT - PADDLE_HEIGHT)
+    paddle1.y = max(paddle1.y, 0)
+    paddle2.y = min(paddle2.y, SCREEN_HEIGHT - PADDLE_HEIGHT)
+    paddle2.y = max(paddle2.y, 0)
 
-            if event.key == pygame.K_LEFT:
+    # Move the ball
+    ball.x += ball.dx
+    ball.y += ball.dy
 
-                rect_change_x = -6
+    # Check for collisions with the paddles
+    if ball.colliderect(paddle1):
+        ball.dx = -ball.dx
+    if ball.colliderect(paddle2):
+        ball.dx = -ball.dx
 
-            elif event.key == pygame.K_RIGHT:
+    # Check if the ball has hit the top or bottom of the screen
+    if ball.y < 0 or ball.y > SCREEN_HEIGHT - BALL_RADIUS * 2:
+        ball.dy = -ball.dy
 
-                rect_change_x = 6
+    # Check if the ball has gone past a paddle
+    if ball.x < 0 or ball.x > SCREEN_WIDTH - BALL_RADIUS * 2:
+        # Game over
+        break
 
-            #elif event.key == pygame.K_UP:
+    # Fill the screen with black
+    screen.fill((0, 0, 0))
 
-                #rect_change_y = -6
+    # Draw the paddles
+    pygame.draw.rect(screen, (255, 255, 255), paddle1)
+    pygame.draw.rect(screen, (255, 255, 255), paddle2)
 
-            #elif event.key == pygame.K_DOWN:
+    # Draw the ball
+    pygame.draw.ellipse(screen, (255, 0, 0), ball)
 
-                #rect_change_y = 6'''            
+    # Update the display
+    pygame.display.flip()
 
-        elif event.type == pygame.KEYUP:
-
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-
-                rect_change_x = 0
-
-            elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-
-                rect_change_y = 0            
-
-    screen.fill(BLACK)
-
-    rect_x += rect_change_x
-    rect_y += rect_change_y
-
-    ball_x += ball_change_x
-    ball_y += ball_change_y
-
-    #this handles the movement of the ball.
-    if ball_x<0:
-
-        ball_x=0
-
-        ball_change_x = ball_change_x * -1
-
-    elif ball_x>785:
-
-        ball_x=785
-
-        ball_change_x = ball_change_x * -1
-
-    elif ball_y<0:
-
-        ball_y=0
-
-        ball_change_y = ball_change_y * -1
-
-    elif ball_x>rect_x and ball_x<rect_x+100 and ball_y==565:
-
-        ball_change_y = ball_change_y * -1
-
-        score = score + 1
-
-    elif ball_y>600:
-
-        ball_change_y = ball_change_y * -1
-
-        score = 0                        
-
-    pygame.draw.rect(screen,WHITE,[ball_x,ball_y,15,15])
-
-    #drawball(screen,ball_x,ball_y)
-
-    drawrect(screen,rect_x,rect_y)
-
-    #score board
-
-    font= pygame.font.SysFont('Calibri', 15, False, False)
-    text = font.render("Score = " + str(score), True, WHITE)
-
-    screen.blit(text,[600,100])    
-    import sys
-sys.path.insert(0, '/path/to/virtualenv/site-packages')
-
-
-    pygame.display.flip()         
-    clock.tick(60)
-pygame.quit()   
+# Game over
+pygame.quit()
 
 
