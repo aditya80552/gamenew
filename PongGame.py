@@ -142,8 +142,12 @@ while not done:
     text = font.render("Score = " + str(score), True, WHITE)
 
     screen.blit(text,[600,100])    
+    import sys
+sys.path.insert(0, '/path/to/virtualenv/site-packages')
+
 
     pygame.display.flip()         
     clock.tick(60)
 pygame.quit()   
+
 
